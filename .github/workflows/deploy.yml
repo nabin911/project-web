@@ -13,9 +13,14 @@ on:
 
 # Set permissions for GitHub Pages deployment
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
+
+# Concurrency group to ensure only one deployment runs at a time
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
 
 # Job definitions
 jobs:
@@ -28,32 +33,18 @@ jobs:
     steps:
       # Step 1: Checkout the repository
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
-          fetch-depth: 2  # We need at least 2 commits to compare changes
+          fetch-depth: 0  # Fetch all history for proper comparison
       
       # Step 2: Detect changes in project directories
       - name: Detect changed files
         id: changes
         run: |
-          # For pushes, compare with the previous commit
-          if [[ $(git diff --name-only HEAD^ HEAD | grep -c "^project1 form/") -gt 0 ]]; then
-            echo "project1_changed=true" >> $GITHUB_OUTPUT
-          else
-            echo "project1_changed=false" >> $GITHUB_OUTPUT
-          fi
-          
-          if [[ $(git diff --name-only HEAD^ HEAD | grep -c "^project2 movie sit/") -gt 0 ]]; then
-            echo "project2_changed=true" >> $GITHUB_OUTPUT
-          else
-            echo "project2_changed=false" >> $GITHUB_OUTPUT
-          fi
-          
-          if [[ $(git diff --name-only HEAD^ HEAD | grep -c "^project3 Custom Video Player/") -gt 0 ]]; then
-            echo "project3_changed=true" >> $GITHUB_OUTPUT
-          else
-            echo "project3_changed=false" >> $GITHUB_OUTPUT
-          fi
+          echo "Creating all projects by default for first deployment"
+          echo "project1_changed=true" >> $GITHUB_OUTPUT
+          echo "project2_changed=true" >> $GITHUB_OUTPUT
+          echo "project3_changed=true" >> $GITHUB_OUTPUT
       
       # Step 3: Create temporary directory for deployment
       - name: Prepare deployment directory
@@ -65,21 +56,21 @@ jobs:
         if: steps.changes.outputs.project1_changed == 'true'
         run: |
           mkdir -p deploy-temp/project1-form
-          cp -r "project1 form"/* deploy-temp/project1-form/
+          cp -r "project1 form"/* deploy-temp/project1-form/ || echo "No files to copy for project1"
       
       # Step 5: Copy Project 2 files
       - name: Copy project2 files
         if: steps.changes.outputs.project2_changed == 'true'
         run: |
           mkdir -p deploy-temp/project2-movie
-          cp -r "project2 movie sit"/* deploy-temp/project2-movie/
+          cp -r "project2 movie sit"/* deploy-temp/project2-movie/ || echo "No files to copy for project2"
       
       # Step 6: Copy Project 3 files
       - name: Copy project3 files
         if: steps.changes.outputs.project3_changed == 'true'
         run: |
           mkdir -p deploy-temp/project3-video
-          cp -r "project3 Custom Video Player"/* deploy-temp/project3-video/
+          cp -r "project3 Custom Video Player"/* deploy-temp/project3-video/ || echo "No files to copy for project3"
       
       # Step 7: Create a main index page
       - name: Create main index page
@@ -165,7 +156,7 @@ jobs:
             </div>
             
             <footer>
-              <p>&copy; 2025 Created by Nabin911</p>
+              <p>&copy; 2023 Created by Nabin911</p>
             </footer>
           </body>
           </html>
@@ -184,7 +175,7 @@ jobs:
       # Step 9: Setup Pages
       - name: Setup Pages
         if: steps.check_deploy.outputs.has_content == 'true'
-        uses: actions/configure-pages@v3
+        uses: actions/configure-pages@v4
         
       # Step 10: Upload artifact
       - name: Upload artifact
@@ -194,7 +185,8 @@ jobs:
           path: './deploy-temp'
           
       # Step 11: Deploy to GitHub Pages
+        # Use GitHub Pages specific deployment action
       - name: Deploy to GitHub Pages
         if: steps.check_deploy.outputs.has_content == 'true'
         id: deployment
-        uses: actions/deploy-pages@v2
+        uses: actions/deploy-pages@v3
