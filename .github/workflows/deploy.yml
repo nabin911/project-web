@@ -23,14 +23,7 @@ jobs:
         with:
           fetch-depth: 2  # We need at least 2 commits to compare changes
       
-      # Step 2: Setup Node.js environment (used for building projects if needed)
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18'
-          cache: 'npm'
-      
-      # Step 3: Detect changes in project directories
+      # Step 2: Detect changes in project directories
       - name: Detect changed files
         id: changes
         run: |
@@ -53,33 +46,33 @@ jobs:
             echo "project3_changed=false" >> $GITHUB_OUTPUT
           fi
       
-      # Step 4: Create temporary directory for deployment
+      # Step 3: Create temporary directory for deployment
       - name: Prepare deployment directory
         run: |
           mkdir -p deploy-temp
       
-      # Step 5: Copy Project 1 files
+      # Step 4: Copy Project 1 files
       - name: Copy project1 files
         if: steps.changes.outputs.project1_changed == 'true'
         run: |
           mkdir -p deploy-temp/project1-form
           cp -r "project1 form"/* deploy-temp/project1-form/
       
-      # Step 6: Copy Project 2 files
+      # Step 5: Copy Project 2 files
       - name: Copy project2 files
         if: steps.changes.outputs.project2_changed == 'true'
         run: |
           mkdir -p deploy-temp/project2-movie
           cp -r "project2 movie sit"/* deploy-temp/project2-movie/
       
-      # Step 7: Copy Project 3 files
+      # Step 6: Copy Project 3 files
       - name: Copy project3 files
         if: steps.changes.outputs.project3_changed == 'true'
         run: |
           mkdir -p deploy-temp/project3-video
           cp -r "project3 Custom Video Player"/* deploy-temp/project3-video/
       
-      # Step 8: Create a main index page
+      # Step 7: Create a main index page
       - name: Create main index page
         run: |
           cat > deploy-temp/index.html << 'EOL'
@@ -169,7 +162,7 @@ jobs:
           </html>
           EOL
       
-      # Step 9: Check if any project was deployed
+      # Step 8: Check if any project was deployed
       - name: Check if any project was deployed
         id: check_deploy
         run: |
@@ -179,7 +172,7 @@ jobs:
             echo "has_content=false" >> $GITHUB_OUTPUT
           fi
       
-      # Step 10: Deploy to GitHub Pages only if there's content to deploy
+      # Step 9: Deploy to GitHub Pages only if there's content to deploy
       - name: Deploy to GitHub Pages
         if: steps.check_deploy.outputs.has_content == 'true'
         uses: peaceiris/actions-gh-pages@v3
