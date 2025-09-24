@@ -1,0 +1,122 @@
+@import url('https://fonts.googleapis.com/css?family=Open+Sans&display=swap');
+
+:root {
+    --success-color: #2ecc71;
+    --error-color: #e74c3c;
+    --primary-color: #3498db;
+    --background-dark: #2c3033;
+    --container-bg: #f7f7f7;
+    --input-bg: #f0f0f0;
+    --input-border: #d1d1d1;
+    --label-color: #333;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    background-color: var(--background-dark);
+    font-family: 'Open Sans', sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    margin: 0;
+}
+
+.container {
+    background-color: var(--container-bg);
+    border-radius: 16px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.15);
+    width: 400px;
+    padding: 32px 0;
+    transition: box-shadow 0.2s;
+}
+
+.container:hover {
+    box-shadow: 0 8px 32px rgba(0,0,0,0.22);
+}
+
+h2 {
+    text-align: center;
+    margin: 0 0 24px;
+    color: var(--primary-color);
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+.form {
+    padding: 0 40px;
+}
+
+.form-control {
+    margin-bottom: 18px;
+    position: relative;
+}
+
+.form-control label {
+    color: var(--label-color);
+    display: block;
+    margin-bottom: 7px;
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.form-control input {
+    border: 2px solid var(--input-border);
+    border-radius: 6px;
+    background: var(--input-bg);
+    display: block;
+    width: 100%;
+    padding: 12px;
+    font-size: 15px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-control input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(52,152,219,0.15);
+}
+
+.form-control.success input {
+    border-color: var(--success-color);
+}
+
+.form-control.error input {
+    border-color: var(--error-color);
+}
+
+.form-control small {
+    color: var(--error-color);
+    position: absolute;
+    left: 0;
+    bottom: -18px;
+    font-size: 13px;
+    visibility: hidden;
+    transition: visibility 0.2s;
+}
+
+.form-control.error small {
+    visibility: visible;
+}
+
+.form button {
+    cursor: pointer;
+    background-color: var(--primary-color);
+    border: none;
+    border-radius: 6px;
+    color: #fff;
+    display: block;
+    font-size: 17px;
+    font-weight: 600;
+    padding: 12px;
+    margin-top: 28px;
+    width: 100%;
+    transition: background 0.2s;
+}
+
+.form button:hover {
+    background-color: #217dbb;
+}
