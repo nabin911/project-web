@@ -6,9 +6,9 @@ on:
     branches:
       - main
     paths:
-      - 'project1/**'
-      - 'project2/**'
-      - 'project3/**'
+      - 'project1 form/**'
+      - 'project2 movie sit/**'
+      - 'project3 Custom Video Player/**'
       - '.github/workflows/deploy.yml'
 
 # Job definitions
@@ -17,98 +17,174 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-      # Step 1: Checkout the repository with full history (needed for detecting changes)
+      # Step 1: Checkout the repository
       - name: Checkout repository
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0  # Fetches all history for detecting file changes
+          fetch-depth: 2  # We need at least 2 commits to compare changes
       
-      # Step 2: Setup Node.js environment (used for building React and Vue projects)
+      # Step 2: Setup Node.js environment (used for building projects if needed)
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '18'  # Choose an appropriate Node.js version
-          cache: 'npm'        # Cache npm dependencies for faster builds
+          node-version: '18'
+          cache: 'npm'
       
       # Step 3: Detect changes in project directories
       - name: Detect changed files
         id: changes
         run: |
-          # Check if files in project1 directory were changed
-          if git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -q "^project1/"; then
+          # For pushes, compare with the previous commit
+          if [[ $(git diff --name-only HEAD^ HEAD | grep -c "^project1 form/") -gt 0 ]]; then
             echo "project1_changed=true" >> $GITHUB_OUTPUT
           else
             echo "project1_changed=false" >> $GITHUB_OUTPUT
           fi
           
-          # Check if files in project2 directory were changed
-          if git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -q "^project2/"; then
+          if [[ $(git diff --name-only HEAD^ HEAD | grep -c "^project2 movie sit/") -gt 0 ]]; then
             echo "project2_changed=true" >> $GITHUB_OUTPUT
           else
             echo "project2_changed=false" >> $GITHUB_OUTPUT
           fi
           
-          # Check if files in project3 directory were changed
-          if git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -q "^project3/"; then
+          if [[ $(git diff --name-only HEAD^ HEAD | grep -c "^project3 Custom Video Player/") -gt 0 ]]; then
             echo "project3_changed=true" >> $GITHUB_OUTPUT
           else
             echo "project3_changed=false" >> $GITHUB_OUTPUT
           fi
       
-      # Step 4: Build Project 1 (React) if changes detected
-      - name: Build project1 (React)
-        if: steps.changes.outputs.project1_changed == 'true'
-        working-directory: project1
-        run: |
-          npm ci
-          npm run build
-          
-      # Step 5: Build Project 3 (Vue) if changes detected
-      - name: Build project3 (Vue)
-        if: steps.changes.outputs.project3_changed == 'true'
-        working-directory: project3
-        run: |
-          npm ci
-          npm run build
-      
-      # Step 6: Create temporary directory for deployment
+      # Step 4: Create temporary directory for deployment
       - name: Prepare deployment directory
         run: |
           mkdir -p deploy-temp
       
-      # Step 7: Copy Project 1 build output (if it was built or already exists)
-      - name: Copy project1 build output
-        if: steps.changes.outputs.project1_changed == 'true' || hashFiles('project1/build/**') != ''
+      # Step 5: Copy Project 1 files
+      - name: Copy project1 files
+        if: steps.changes.outputs.project1_changed == 'true'
         run: |
-          mkdir -p deploy-temp/project1
-          if [ -d "project1/build" ]; then
-            cp -r project1/build/* deploy-temp/project1/
-          fi
+          mkdir -p deploy-temp/project1-form
+          cp -r "project1 form"/* deploy-temp/project1-form/
       
-      # Step 8: Copy Project 2 files (static HTML site, no build required)
+      # Step 6: Copy Project 2 files
       - name: Copy project2 files
-        if: steps.changes.outputs.project2_changed == 'true' || hashFiles('project2/**') != ''
+        if: steps.changes.outputs.project2_changed == 'true'
         run: |
-          mkdir -p deploy-temp/project2
-          cp -r project2/* deploy-temp/project2/
+          mkdir -p deploy-temp/project2-movie
+          cp -r "project2 movie sit"/* deploy-temp/project2-movie/
       
-      # Step 9: Copy Project 3 build output (if it was built or already exists)
-      - name: Copy project3 build output
-        if: steps.changes.outputs.project3_changed == 'true' || hashFiles('project3/dist/**') != ''
+      # Step 7: Copy Project 3 files
+      - name: Copy project3 files
+        if: steps.changes.outputs.project3_changed == 'true'
         run: |
-          mkdir -p deploy-temp/project3
-          if [ -d "project3/dist" ]; then
-            cp -r project3/dist/* deploy-temp/project3/
+          mkdir -p deploy-temp/project3-video
+          cp -r "project3 Custom Video Player"/* deploy-temp/project3-video/
+      
+      # Step 8: Create a main index page
+      - name: Create main index page
+        run: |
+          cat > deploy-temp/index.html << 'EOL'
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Project Portfolio</title>
+            <style>
+              body {
+                font-family: 'Arial', sans-serif;
+                line-height: 1.6;
+                max-width: 800px;
+                margin: 0 auto;
+                padding: 20px;
+                background-color: #f5f5f5;
+                color: #333;
+              }
+              h1 {
+                color: #2c3e50;
+                border-bottom: 2px solid #3498db;
+                padding-bottom: 10px;
+              }
+              .project-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+                gap: 20px;
+                margin-top: 30px;
+              }
+              .project-card {
+                background-color: white;
+                border-radius: 8px;
+                overflow: hidden;
+                box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+                transition: transform 0.3s ease, box-shadow 0.3s ease;
+              }
+              .project-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+              }
+              .project-card a {
+                display: block;
+                padding: 20px;
+                text-decoration: none;
+                color: #2c3e50;
+                font-weight: bold;
+              }
+              .project-card p {
+                padding: 0 20px 20px;
+                margin-top: -10px;
+                color: #7f8c8d;
+              }
+              footer {
+                margin-top: 50px;
+                text-align: center;
+                color: #7f8c8d;
+                font-size: 0.9em;
+              }
+            </style>
+          </head>
+          <body>
+            <h1>My Web Projects</h1>
+            <p>Welcome to my portfolio of web projects. Click on any project below to view it.</p>
+            
+            <div class="project-grid">
+              <div class="project-card">
+                <a href="project1-form/">Project 1: Form</a>
+                <p>An interactive form built with HTML, CSS, and JavaScript.</p>
+              </div>
+              
+              <div class="project-card">
+                <a href="project2-movie/">Project 2: Movie Seat Booking</a>
+                <p>A movie seat booking application with interactive seat selection.</p>
+              </div>
+              
+              <div class="project-card">
+                <a href="project3-video/">Project 3: Custom Video Player</a>
+                <p>A custom HTML5 video player with custom controls.</p>
+              </div>
+            </div>
+            
+            <footer>
+              <p>&copy; 2025 Created by Nabin911</p>
+            </footer>
+          </body>
+          </html>
+          EOL
+      
+      # Step 9: Check if any project was deployed
+      - name: Check if any project was deployed
+        id: check_deploy
+        run: |
+          if [ -d "deploy-temp" ] && [ "$(ls -A deploy-temp)" ]; then
+            echo "has_content=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_content=false" >> $GITHUB_OUTPUT
           fi
       
-      # Step 10: Deploy to GitHub Pages
+      # Step 10: Deploy to GitHub Pages only if there's content to deploy
       - name: Deploy to GitHub Pages
+        if: steps.check_deploy.outputs.has_content == 'true'
         uses: peaceiris/actions-gh-pages@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}  # Automatically provided by GitHub
-          publish_dir: ./deploy-temp  # Directory to publish
-          destination_dir: .  # Deploy to root of gh-pages branch
-          keep_files: true  # Don't delete files not affected by this deployment
-          
-          # Optional: Customize commit message
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./deploy-temp
+          keep_files: false
           commit_message: "Deploy projects to GitHub Pages"
