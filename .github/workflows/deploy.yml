@@ -177,10 +177,10 @@ jobs:
         if: steps.check_deploy.outputs.has_content == 'true'
         uses: actions/configure-pages@v4
         
-      # Step 10: Upload artifact - UPDATED to use v4 instead of v2
+      # Step 10: Upload artifact - Using v4 instead of deprecated v3
       - name: Upload artifact
         if: steps.check_deploy.outputs.has_content == 'true'
-        uses: actions/upload-pages-artifact@v4  # Updated from v2 to v4
+        uses: actions/upload-pages-artifact@v4
         with:
           path: './deploy-temp'
           
@@ -188,4 +188,4 @@ jobs:
       - name: Deploy to GitHub Pages
         if: steps.check_deploy.outputs.has_content == 'true'
         id: deployment
-        uses: actions/deploy-pages@v4  # Updated from v3 to v4
+        uses: actions/deploy-pages@v4
